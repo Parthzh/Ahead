@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ahead — Demo orders</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    :root { font-family: 'Segoe UI', system-ui, sans-serif; color:#24291f; background:#faf8f3; }
+    body { max-width:760px; margin:0 auto; padding:32px 16px; }
+    h1 { margin:0 0 8px; } p { color:#6b7266; }
+    .menu { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin:24px 0; }
+    .item, .cart { padding:16px; background:#fff; border:1px solid #e2ddd0; border-radius:10px; }
+    button { padding:10px 14px; border:0; border-radius:8px; background:#1d6f4f; color:#fff; font:600 15px inherit; cursor:pointer; }
+    button:hover { background:#14503a; } .cart { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    #cart-items { margin:0; padding-left:20px; } #status { min-height:24px; margin-top:16px; font-weight:600; } .error { color:#b53d3d; }
+  </style>
+</head>
+<body>
+  <h1>Ahead demo menu</h1>
+  <p>This menu updates live. Items switched off by the vendor are hidden here immediately.</p>
+  <main class="menu" id="menu"></main>
+  <section class="cart">
+    <div><strong>Cart</strong><ul id="cart-items"><li>No items selected</li></ul></div>
+    <button id="place-order" type="button" disabled>Place dummy order</button>
+  </section>
+  <p id="status" aria-live="polite"></p>
+  <script type="module">
+    import { createOrder, listenToMenu } from './queue-engine/queue-engine.js';
+    const cart = new Map();
+    const menuEl = document.getElementById('menu');
+    const cartEl = document.getElementById('cart-items');
+    const placeButton = document.getElementById('place-order');
+    const statusEl = document.getElementById('status');
+
+    listenToMenu(renderMenu, { onError: (error) => { statusEl.className = 'error'; statusEl.textContent = `Could not load menu: ${error.message}`; } });
+
+    function renderMenu(menu) {
+      menuEl.replaceChildren();
+      const availableItems = menu.filter((item) => item.available);
+      if (!availableItems.length) { menuEl.textContent = 'No items are available right now.'; return; }
+      availableItems.forEach((item) => {
+        const card = document.createElement('article');
+        card.className = 'item';
+        const name = document.createElement('strong'); name.textContent = item.name;
+        const price = document.createElement('p'); price.textContent = `₹${item.price}`;
+        const button = document.createElement('button'); button.type = 'button'; button.textContent = 'Add';
+        button.addEventListener('click', () => { cart.set(item.id, { ...item, qty: (cart.get(item.id)?.qty || 0) + 1 }); renderCart(); });
+        card.append(name, price, button); menuEl.append(card);
+      });
+    }
+
+    function renderCart() {
+      const items = [...cart.values()];
+      cartEl.innerHTML = items.length ? items.map((item) => `<li>${item.qty}× ${item.name}</li>`).join('') : '<li>No items selected</li>';
+      placeButton.disabled = items.length === 0;
+    }
+
+    placeButton.addEventListener('click', async () => {
+      placeButton.disabled = true;
+      statusEl.className = '';
+      statusEl.textContent = 'Placing order…';
+      try {
+        const order = await createOrder([...cart.values()]);
+        cart.clear(); renderCart();
+        statusEl.textContent = `Order placed successfully — token ${order.token}. Check the vendor dashboard.`;
+      } catch (error) {
+        statusEl.className = 'error';
+        statusEl.textContent = `Could not place the order: ${error.message}`;
+        placeButton.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
