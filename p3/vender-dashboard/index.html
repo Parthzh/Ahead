@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ahead — Vendor Console</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+</head>
+<body>
+  <main class="vendor-console">
+    <header class="console-header">
+      <div><p class="eyebrow">Ahead · Vendor console</p><h1>Order approvals</h1></div>
+      <div class="connection" aria-live="polite"><span class="live-dot" id="live-dot"></span><span id="live-text">Connecting…</span></div>
+    </header>
+
+    <div class="connection-banner" id="connection-banner" hidden><span id="connection-message"></span><button id="reconnect-button" type="button">Reconnect</button></div>
+
+    <section class="overview" aria-label="Queue summary">
+      <span><strong id="queued-count">0</strong> awaiting approval</span>
+      <span><strong id="preparing-count">0</strong> in preparation</span>
+      <button id="refresh-button" type="button">Refresh</button>
+    </section>
+
+    <section class="current-order-section" aria-labelledby="current-order-heading">
+      <div class="section-heading"><p class="eyebrow">Decision now</p><h2 id="current-order-heading">Current order</h2></div>
+      <div class="current-order" id="current-order"><p class="empty-state">Loading the next order…</p></div>
+    </section>
+
+    <section class="upcoming-section" aria-labelledby="upcoming-heading">
+      <div class="section-heading"><p class="eyebrow">Next in line</p><h2 id="upcoming-heading">Upcoming orders</h2></div>
+      <div class="upcoming-list" id="upcoming-list"></div>
+    </section>
+
+    <section class="availability-section" aria-labelledby="availability-heading">
+      <div class="section-heading"><p class="eyebrow">Menu control</p><h2 id="availability-heading">Availability</h2></div>
+      <p class="section-note">Turn an item off when it is unavailable. Students using the demo menu see the change immediately.</p>
+      <div class="availability-list" id="availability-list"><p class="empty-state">Loading menu…</p></div>
+    </section>
+  </main>
+
+  <dialog id="confirmation-dialog"><form method="dialog"><p class="eyebrow">Confirm decision</p><h2 id="confirm-title">Approve order?</h2><p id="confirm-message"></p><div class="dialog-actions"><button value="cancel" class="button-secondary">Go back</button><button value="confirm" class="button-primary">Confirm</button></div></form></dialog>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
