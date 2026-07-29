@@ -1,0 +1,119 @@
+<!doctype html>
+<!--
+  Ahead / student-app
+  Run locally with VS Code's "Live Server" extension, or from this folder run:
+    npx serve .
+  Then open the localhost address it prints. Do not double-click index.html:
+  browser module security can block shared imports when opening from file://.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#1d6f4f" />
+    <title>Ahead | Order ahead</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="site-header">
+        <a class="brand" href="#menu" aria-label="Ahead home">
+          <span class="brand-mark" aria-hidden="true">A</span>
+          <span>Ahead</span>
+        </a>
+        <p class="header-note">Canteen pre-order</p>
+      </header>
+
+      <section id="browse-view" class="browse-view">
+        <div class="intro-row">
+          <div>
+            <p class="eyebrow">SKIP THE QUEUE</p>
+            <h1>Order before the rush.</h1>
+            <p class="intro-copy">Choose your food now. We’ll give you a clear pickup time when your order is in.</p>
+          </div>
+          <section class="rush-meter" aria-label="Current canteen crowd level">
+            <span class="rush-label">CANTEEN NOW</span>
+            <strong id="rush-level">Loading</strong>
+            <span id="rush-detail">Checking the queue</span>
+          </section>
+        </div>
+
+        <section class="menu-section" aria-labelledby="menu-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">TODAY'S MENU</p>
+              <h2 id="menu-title">Ready when you are</h2>
+            </div>
+            <span id="menu-state" class="menu-state" aria-live="polite">Loading menu…</span>
+          </div>
+          <!-- When connected to Supabase, this renders the menu rows seeded by P1. -->
+          <div id="menu-grid" class="menu-grid" aria-live="polite"></div>
+        </section>
+
+        <section class="combo-section" aria-labelledby="combo-title">
+          <div>
+            <p class="eyebrow">MOST ORDERED TOGETHER</p>
+            <h2 id="combo-title">A faster choice</h2>
+          </div>
+          <div id="combo-list" class="combo-list"></div>
+        </section>
+      </section>
+
+      <section id="confirmation-view" class="confirmation-view" hidden aria-live="polite">
+        <p class="eyebrow">ORDER CONFIRMED</p>
+        <h1>You’re ahead of the line.</h1>
+        <p class="confirmation-copy">Show this token at the pickup counter. We’ll keep the time updated as the kitchen moves.</p>
+        <div class="token-panel">
+          <span>YOUR TOKEN</span>
+          <strong id="order-token">A-001</strong>
+        </div>
+        <div class="order-progress" aria-label="Order progress">
+          <div class="progress-line"><span id="progress-fill"></span></div>
+          <div class="progress-steps">
+            <span class="is-active" data-step="queued">Awaiting approval</span>
+            <span data-step="preparing">Preparing</span>
+            <span data-step="ready">Ready</span>
+          </div>
+        </div>
+        <div class="ready-details">
+          <div>
+            <span>ESTIMATED PICKUP</span>
+            <strong id="ready-time">—</strong>
+          </div>
+          <div>
+            <span>WAIT TIME</span>
+            <strong id="wait-time">—</strong>
+          </div>
+        </div>
+        <p id="status-message" class="status-message">Your order is in the queue.</p>
+        <button id="new-order-button" class="secondary-button" type="button">Place another order</button>
+      </section>
+    </main>
+
+    <aside id="cart" class="cart" aria-label="Your cart">
+      <div class="cart-summary">
+        <span class="cart-kicker">YOUR ORDER</span>
+        <strong id="cart-count">0 items</strong>
+        <span id="cart-total">₹0</span>
+      </div>
+      <button id="cart-toggle" class="cart-toggle" type="button" aria-expanded="false" aria-controls="cart-detail">View cart</button>
+      <div id="cart-detail" class="cart-detail">
+        <div id="cart-items" class="cart-items"><p class="empty-cart">Your cart is waiting for something delicious.</p></div>
+        <button id="place-order-button" class="place-order-button" type="button" disabled>Place order <span id="place-order-total">₹0</span></button>
+        <p id="order-error" class="order-error" role="alert"></p>
+      </div>
+    </aside>
+
+    <template id="menu-item-template">
+      <article class="menu-item">
+        <img class="menu-photo" src="" alt="" />
+        <div class="menu-item-topline"><span class="prep-time"></span><span class="popular-badge" hidden>Popular</span></div>
+        <h3></h3>
+        <div class="menu-item-footer"><strong class="item-price"></strong><div class="item-control"></div></div>
+      </article>
+    </template>
+    <!-- Required by P1's shared Supabase client. Keep it before app.js. -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
