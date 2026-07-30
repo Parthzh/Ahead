@@ -23,7 +23,10 @@ Ahead/
 ├── index.html              # Landing page linking to the two demo apps
 └── pages/
     ├── student-app/         # Student ordering interface
-    └── vendor-dashboard/     # Vendor approval console
+    ├── vendor-dashboard/     # Vendor approval console
+    ├── queue-engine/
+    ├── wait-time/
+    └── payment-placeholder/
 ```
 
 ## Getting Started
