@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notification Demo</title>
+  <style>
+    :root {
+      --color-primary: #1d6f4f; --color-accent: #e08a2c; --color-bg: #faf8f3;
+      --color-surface: #ffffff; --color-text: #24291f; --radius: 10px;
+      --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    body {
+      font-family: var(--font);
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .demo-card {
+      background-color: var(--color-surface);
+      padding: 32px;
+      border-radius: var(--radius);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    h2 { margin: 0 0 16px; font-weight: 600; }
+    p { margin: 0 0 24px; color: #555; line-height: 1.5; }
+    
+    .button-primary {
+      background-color: var(--color-primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .button-primary:hover {
+      background-color: #14503a;
+    }
+
+    /* Fallback banner styling */
+    .fallback-banner {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--color-accent);
+      color: white;
+      padding: 16px 24px;
+      border-radius: var(--radius);
+      font-weight: 600;
+      box-shadow: 0 12px 32px rgba(224, 138, 44, 0.3);
+      display: none;
+      z-index: 1000;
+    }
+    .fallback-banner.is-visible {
+      display: block;
+      animation: slideDown 0.3s ease-out;
+    }
+    @keyframes slideDown {
+      from { top: -50px; opacity: 0; }
+      to { top: 20px; opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- In-app fallback banner if native notifications are blocked -->
+  <div id="fallback-banner" class="fallback-banner">
+    Your order is ready for pickup!
+  </div>
+
+  <div class="demo-card">
+    <h2>Order Notifications</h2>
+    <p>Click below to request notification permissions and simulate an order turning "ready".</p>
+    <button id="trigger-btn" class="button-primary">Simulate "Ready" Event</button>
+  </div>
+
+  <script>
+    const triggerBtn = document.getElementById('trigger-btn');
+    const fallbackBanner = document.getElementById('fallback-banner');
+
+    triggerBtn.addEventListener('click', async () => {
+      triggerBtn.disabled = true;
+      triggerBtn.textContent = 'Simulating...';
+
+      // 1. Request Permission
+      let permission = Notification.permission;
+      if (permission === 'default') {
+        permission = await Notification.requestPermission();
+      }
+
+      // 2. Simulate network delay before order becomes ready
+      setTimeout(() => {
+        const title = 'Order Ready!';
+        const options = {
+          body: 'Your food is ready for pickup at the counter.',
+          icon: 'https://cdn-icons-png.flaticon.com/512/3280/3280041.png'
+        };
+
+        if (permission === 'granted') {
+          // Trigger native browser notification
+          new Notification(title, options);
+        } else {
+          // Trigger fallback visual banner
+          fallbackBanner.classList.add('is-visible');
+          setTimeout(() => fallbackBanner.classList.remove('is-visible'), 5000);
+        }
+
+        triggerBtn.disabled = false;
+        triggerBtn.textContent = 'Simulate "Ready" Event';
+      }, 1000);
+    });
+
+    /*
+    ================================================================================
+      USAGE EXAMPLE (for teammates):
+    ================================================================================
+    
+    // Listen to Firebase document changes (pseudo-code):
+    onSnapshot(doc(db, "orders", myOrderId), (doc) => {
+      const order = doc.data();
+      if (order.status === 'ready') {
+        if (Notification.permission === 'granted') {
+          new Notification('Order Ready!', { body: `Token ${order.token} is ready for pickup.` });
+        } else {
+          showFallbackBanner();
+        }
+      }
+    });
+    */
+  </script>
+</body>
+</html>
