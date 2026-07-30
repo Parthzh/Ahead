@@ -1,5 +1,6 @@
 import { listenToMenu, listenToOrders, updateMenuAvailability, updateOrderStatus } from '../queue-engine/queue-engine.js';
 
+const COMPACT_MENU_LIMIT = 4;
 const state = { queuedOrders: [], preparingOrders: [], menu: [], unsubscribeOrders: null };
 const dialog = document.getElementById('confirmation-dialog');
 const confirmTitle = document.getElementById('confirm-title');
@@ -7,6 +8,8 @@ const confirmMessage = document.getElementById('confirm-message');
 const currentOrderEl = document.getElementById('current-order');
 const upcomingListEl = document.getElementById('upcoming-list');
 const availabilityListEl = document.getElementById('availability-list');
+const availabilityDialog = document.getElementById('availability-dialog');
+const availabilityDialogListEl = document.getElementById('availability-dialog-list');
 
 function setConnectionState(connectionState) {
   const text = document.getElementById('live-text');
@@ -77,19 +80,30 @@ function buildPreparingOrder(order) {
 
 function renderMenu(menu) {
   state.menu = menu;
-  availabilityListEl.replaceChildren(...menu.map((item) => {
-    const label = document.createElement('label');
-    label.className = 'availability-item';
-    label.innerHTML = `<span>${escapeHtml(item.name)}</span><span class="switch"><input type="checkbox" ${item.available ? 'checked' : ''} aria-label="${escapeHtml(item.name)} availability"><span class="slider"></span></span>`;
-    const toggle = label.querySelector('input');
-    toggle.addEventListener('change', async () => {
-      toggle.disabled = true;
-      try { await updateMenuAvailability(item.id, toggle.checked); }
-      catch (error) { toggle.checked = !toggle.checked; showError(`Could not change ${item.name}: ${error.message}`); }
-      finally { toggle.disabled = false; }
-    });
-    return label;
-  }));
+  const availabilityToggle = document.getElementById('availability-toggle');
+  const hasHiddenItems = menu.length > COMPACT_MENU_LIMIT;
+  availabilityToggle.hidden = !hasHiddenItems;
+  availabilityToggle.setAttribute('aria-expanded', String(availabilityDialog.open));
+  availabilityListEl.replaceChildren(...menu.slice(0, COMPACT_MENU_LIMIT).map(buildAvailabilityCard));
+  availabilityDialogListEl.replaceChildren(...menu.map(buildAvailabilityCard));
+}
+
+function buildAvailabilityCard(item) {
+  const card = document.createElement('button');
+  card.type = 'button';
+  card.className = `availability-item${item.available ? ' is-available' : ''}`;
+  card.setAttribute('aria-pressed', String(Boolean(item.available)));
+  card.setAttribute('aria-label', `${item.name}: ${item.available ? 'available' : 'unavailable'}. Activate to change.`);
+  card.innerHTML = `<span class="availability-name">${escapeHtml(item.name)}</span><span class="availability-status">${item.available ? 'Available' : 'Unavailable'}</span>`;
+  card.addEventListener('click', async () => {
+    card.disabled = true;
+    try {
+      await updateMenuAvailability(item.id, !item.available);
+      renderMenu(state.menu.map((menuItem) => menuItem.id === item.id ? { ...menuItem, available: !item.available } : menuItem));
+    } catch (error) { showError(`Could not change ${item.name}: ${error.message}`); }
+    finally { card.disabled = false; }
+  });
+  return card;
 }
 
 async function decide(order, status) {
@@ -117,6 +131,16 @@ function openDialog() { return new Promise((resolve) => { dialog.addEventListene
 
 document.getElementById('refresh-button').addEventListener('click', () => state.unsubscribeOrders?.refresh());
 document.getElementById('reconnect-button').addEventListener('click', () => state.unsubscribeOrders?.refresh());
+document.getElementById('availability-toggle').addEventListener('click', () => {
+  availabilityDialog.showModal();
+  document.getElementById('availability-toggle').setAttribute('aria-expanded', 'true');
+});
+document.getElementById('availability-dialog-close').addEventListener('click', () => availabilityDialog.close());
+availabilityDialog.addEventListener('close', () => document.getElementById('availability-toggle').setAttribute('aria-expanded', 'false'));
+document.getElementById('logout-button').addEventListener('click', () => {
+  sessionStorage.removeItem('vendor_auth');
+  window.location.replace('login.html');
+});
 state.unsubscribeOrders = listenToOrders(setOrders, { onConnectionState: setConnectionState, onError: (error) => showError(`Connection problem: ${error.message}`) });
 const stopMenuListener = listenToMenu(renderMenu, { onError: (error) => showError(`Could not load menu: ${error.message}`) });
 window.addEventListener('beforeunload', () => { state.unsubscribeOrders?.(); stopMenuListener(); });
