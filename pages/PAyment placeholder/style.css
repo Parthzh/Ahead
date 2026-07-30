@@ -57,7 +57,8 @@ h2 { margin-bottom: 0; font-size: 22px; letter-spacing: -.45px; }
 .rush-meter span:last-child { color: var(--color-text-muted); font-size: 13px; }
 .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
 .menu-state { color: var(--color-text-muted); font-size: 13px; white-space: nowrap; }
-.menu-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.menu-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+@media (min-width: 480px) { .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .menu-item, .combo-section { border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); }
 .menu-item { min-height: 242px; display: flex; flex-direction: column; overflow: hidden; padding: 0 16px 16px; transition: border-color .16s ease, transform .16s ease; }
 .menu-item:hover { border-color: #bfcdbd; transform: translateY(-2px); }
