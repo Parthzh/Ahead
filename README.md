@@ -1,70 +1,44 @@
-<div align="center">
-  
-# 🚀 Ahead | Smart Canteen Ordering System
-**Skip the line. Own your time.**
+# Ahead | Smart Canteen Ordering System
+**Live Deployment:** [https://hypervisors-parth.vercel.app/](https://hypervisors-parth.vercel.app/)
 
-[![UI/UX](https://img.shields.io/badge/UI%2FUX-Glassmorphism-1d6f4f?style=for-the-badge)](https://github.com/Parthzh/Hypervisors-Parth)
-[![Database](https://img.shields.io/badge/Database-Supabase-47c279?style=for-the-badge)](https://supabase.com/)
-[![Audio](https://img.shields.io/badge/Engine-Web_Audio_API-e08a2c?style=for-the-badge)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
-
-</div>
-
-## 📌 The Problem
-College canteens are chaotic. During peak rush hours, students waste up to 30 minutes standing in line just to place an order, often resulting in missed classes or skipped meals. Vendors struggle to manage the massive influx of physical tokens and overlapping verbal orders, leading to delays and incorrect items.
-
-## 💡 Our Solution: Ahead
-**Ahead** is a premium, real-time smart ordering platform that completely eliminates the physical queue. Designed with an ultra-modern aesthetic and real-time backend, Ahead connects students directly to the kitchen. 
-
-Students can browse the menu, form ordering squads with their friends, place their orders, and receive real-time updates—all while sitting in class or studying.
+## Overview
+Ahead is a real-time, low-latency ordering system designed to eliminate physical bottlenecks in university canteens. By shifting the queueing process entirely online, Ahead optimizes kitchen workflows and allows students to reclaim time lost to waiting in physical lines.
 
 ---
 
-## ✨ Standout Features & Unique Innovations
+## 🎯 The X-Factor: Squad Cart (Multiplayer Ordering)
+Our primary technical innovation is the **Squad Cart**—a collaborative, multiplayer ordering lobby. 
 
-### 1. 🔮 "X-Factor" Glassmorphism UI
-We didn't just build a functional app; we built an **experience**. The entire application features a stunning, state-of-the-art Glassmorphism design system.
-* **Ambient Lighting:** Dynamic, CSS-animated glowing orbs float in the background, responding to user scrolls.
-* **Frosted Glass:** Navigation bars, decision cards, and summaries utilize deep `backdrop-filter` blurs for a premium iOS-like aesthetic.
-* **Fluid Micro-interactions:** Every button and card features meticulously crafted hover states and smooth cubic-bezier scaling.
+In traditional ordering systems, one person is forced to pass their phone around or manually collect everyone's requests. Squad Cart solves this by allowing multiple users to join a shared session simultaneously. 
+* **Real-Time Sync:** Powered by Supabase WebSockets, any item added or removed by one user instantly updates across all active clients in the lobby.
+* **Race-Condition Handling:** The architecture ensures that concurrent additions don't override the global cart state, maintaining consistency across distributed clients.
 
-### 2. ⚡ Real-Time Supabase Queue Engine
-We engineered a low-latency, real-time backend using **Supabase** (PostgreSQL). 
-* When a student places an order, the **Vendor Dashboard** updates instantaneously via WebSockets without a page refresh.
-* As the vendor progresses the order (Queued ➔ Preparing ➔ Ready), the student's app reflects the changes instantly.
+## 🛠️ Core Features
 
-### 3. 🤝 "Squad Cart" (Multiplayer Ordering)
-Why order alone? We built a collaborative "Lobby" system where friends can join a shared session. 
-* Multiple users can add items to the exact same cart simultaneously.
-* The state is synced in real-time across all devices, making group orders incredibly seamless and fun.
+### 1. Low-Latency Event Pipeline (Supabase)
+The backbone of Ahead is built on Supabase (PostgreSQL). We utilized Supabase Realtime Channels to build a live data pipeline between the student interface and the vendor control center. Orders transition through states (`queued` -> `preparing` -> `ready`) instantly without relying on heavy HTTP polling.
 
-### 4. 🎵 Native Web Audio API Synth Engine
-Instead of relying on clunky `.mp3` files that bloat the repository, we built a custom audio engine from scratch using the **Web Audio API**.
-* Generates pure, mathematical sine/triangle soundwaves directly in the browser.
-* Provides delightful UI feedback: subtle high-frequency taps when clicking items, an ascending major chord when an order is placed, and a resonant, echoing bell when an order is marked "Ready".
+### 2. Vendor Dispatch Dashboard
+A streamlined, robust dashboard designed specifically for kitchen staff. It processes incoming data streams from the database in real-time, allowing vendors to triage, accept, and dispatch orders with single-click actions to minimize interaction time.
 
-### 5. 🎬 Bollywood Loading Quotes
-To combat perceived wait times, we implemented a dynamic quote rotation system. While waiting for their order, students are entertained by famous, food-related Bollywood quotes, keeping the UX playful and culturally resonant.
+### 3. Native Web Audio Synthesis
+To provide immediate UI feedback without the overhead of external `.mp3` assets, we engineered a custom audio module using the browser's native **Web Audio API**. This mathematically synthesizes discrete soundwaves (sine/triangle) for precise interactions, including a distinct resonant bell when an order is marked ready by the kitchen.
+
+### 4. Dynamic State Handling
+To reduce perceived latency and wait anxiety, the application utilizes dynamic loading states and conditional rendering (including a rotating list of culturally relevant quotes) to keep users engaged while their order is processed in the background.
 
 ---
 
-## 🛠️ Architecture & Tech Stack
+## 💻 Tech Stack
+* **Frontend:** Vanilla HTML5, CSS3, ES6 JavaScript
+* **Backend:** Supabase (PostgreSQL)
+* **Real-time Engine:** Supabase Realtime Channels (WebSockets)
+* **Audio:** Web Audio API
+* **Deployment:** Vercel
 
-* **Frontend:** Vanilla HTML5, CSS3, ES6 JavaScript (Zero heavy frameworks, blazing fast load times)
-* **Backend / Database:** Supabase (PostgreSQL)
-* **Real-time Sync:** Supabase Realtime Channels (WebSockets)
-* **Audio:** Native Web Audio API
-* **Design System:** Custom CSS properties, Inter Font Family, Flexbox/Grid layouts.
-
-## 📂 Project Structure
-* `/student-app` - The primary mobile-first interface for students to browse and order.
-* `/pages/squad-cart` - The multiplayer collaborative ordering lobby.
-* `/pages/vendor-dashboard` - The real-time, low-latency control center for kitchen staff.
-* `/pages/queue-engine` - The core database integration and WebSocket channel listeners.
-* `/pages/audio` - The mathematical synthesizer engine for UI sounds.
-* `/pages/PAyment placeholder` - The glassmorphism checkout and receipt view.
-
-## 🚀 Getting Started (Local Development)
-1. Clone this repository.
-2. Run `pages/queue-engine/database-migration.sql` inside your Supabase SQL Editor.
-3. Add your Supabase URL and Anon Key to `pages/queue-engine/supabase-config.js`.
-4. Launch `student-app/index.html` using a local Live Server!
+## 📂 Architecture
+* `/student-app` - Core interface for menu browsing and individual checkout.
+* `/pages/squad-cart` - The multiplayer, concurrent session lobby.
+* `/pages/vendor-dashboard` - Admin control center for real-time order management.
+* `/pages/queue-engine` - Shared library for database interactions and WebSocket listeners.
+* `/pages/audio` - Web Audio API synthesis logic.
