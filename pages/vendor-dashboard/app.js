@@ -1,5 +1,5 @@
 import { listenToMenu, listenToOrders, updateMenuAvailability, updateOrderStatus } from '../queue-engine/queue-engine.js';
-
+import { playAlert } from '../audio/audio.js';
 const COMPACT_MENU_LIMIT = 4;
 const state = { queuedOrders: [], preparingOrders: [], menu: [], unsubscribeOrders: null };
 const dialog = document.getElementById('confirmation-dialog');
@@ -22,7 +22,13 @@ function setConnectionState(connectionState) {
 }
 
 function setOrders(orders) {
-  state.queuedOrders = orders.filter((order) => order.status === 'queued').sort((first, second) => new Date(first.placed_at) - new Date(second.placed_at));
+  const newQueued = orders.filter((order) => order.status === 'queued').sort((first, second) => new Date(first.placed_at) - new Date(second.placed_at));
+  
+  if (newQueued.length > state.queuedOrders.length) {
+    playAlert();
+  }
+  
+  state.queuedOrders = newQueued;
   state.preparingOrders = orders.filter((order) => order.status === 'preparing').sort((first, second) => new Date(first.placed_at) - new Date(second.placed_at));
   
   document.getElementById('queued-count').textContent = state.queuedOrders.length;

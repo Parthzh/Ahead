@@ -1,17 +1,7 @@
 /*
   Ahead student ordering page.
-
-  INTEGRATION (after your team puts folders together):
-  1. Place this `student-app` folder beside P1's `queue-engine` folder.
-  2. The dynamic import below will then use P1's real createOrder() and
-     Supabase client automatically. No Firebase config belongs in this page.
-  3. Run through a local web server (see index.html) and open DevTools Console.
-     You should see "Ahead: connected to shared queue engine".
-
-  Until queue-engine is beside this folder, this uses local demo data so the
-  complete menu → cart → token flow remains visible and testable.
 */
-
+import { playClick, playSuccess, playReady } from '../audio/audio.js';
 import { supabase } from '../queue-engine/supabase-config.js';
 
 const DEMO_MENU = [
@@ -197,6 +187,7 @@ function createStepper(item, qty) {
   wrapper.append(remove, count, add); return wrapper;
 }
 function changeQty(item, delta) { 
+  playClick();
   const current = state.cart.get(item.id)?.qty ?? 0; 
   const qty = Math.max(0, current + delta); 
   if (qty) state.cart.set(item.id, { ...item, qty }); 
@@ -356,6 +347,7 @@ function friendlyOrderError(error) {
   return 'We could not place that order. Check your internet connection and try again.';
 }
 function showConfirmation(order) {
+  playSuccess();
   state.order = normaliseOrder(order); $('#browse-view').hidden = true; $('#cart').hidden = true; $('#confirmation-view').hidden = false; updateOrderUI(state.order);
   
   startQuotes();
@@ -382,7 +374,10 @@ function subscribeToActivePreviousOrders() {
         updateOrderUI(state.order);
         
         if (state.order.status === 'cancelled' && !wasCancelled) showStudentNotice('Order rejected — the canteen could not accept this order. Please choose another available item.');
-        if (state.order.status === 'ready' && !wasReady) showReadyNotification(state.order);
+        if (state.order.status === 'ready' && !wasReady) {
+          playReady();
+          showReadyNotification(state.order);
+        }
         
         if (['ready', 'picked_up', 'cancelled'].includes(state.order.status)) {
           stopQuotes();
