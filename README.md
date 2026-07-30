@@ -14,7 +14,7 @@ Ahead lets students place canteen orders ahead of time instead of standing in li
 ## Tech Stack
 
 - HTML, CSS, and vanilla JavaScript on the front end
-- Firebase for the real-time backend/database
+- Supabase for the real-time backend/database
 
 ## Project Structure
 
