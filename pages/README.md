@@ -1,9 +1,9 @@
 These are the uses for each of the folders included in this folder
 
-queue-engine:
+-queue-engine:
 
-student-app: 
+-student-app: 
 
-vendor-dashboard:
+-vendor-dashboard:
 
-wait-time:
+-wait-time:
