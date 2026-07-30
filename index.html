@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ahead | P2 + P3 live demo</title>
+    <style>
+      :root { font-family: 'Segoe UI', system-ui, sans-serif; color: #24291f; background: #faf8f3; }
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; box-sizing: border-box; }
+      main { width: min(620px, 100%); }
+      .mark { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; background: #1d6f4f; color: white; font-weight: 800; }
+      h1 { margin: 16px 0 8px; font-size: clamp(32px, 7vw, 48px); letter-spacing: -1.4px; }
+      p { color: #6b7266; line-height: 1.55; }
+      .links { display: grid; gap: 12px; margin-top: 32px; }
+      a { display: flex; justify-content: space-between; align-items: center; padding: 20px; border: 1px solid #e2ddd0; border-radius: 10px; background: #fff; color: #24291f; text-decoration: none; font-weight: 700; }
+      a span { color: #1d6f4f; font-size: 14px; }
+      a:hover { border-color: #1d6f4f; }
+      .note { margin-top: 28px; font-size: 13px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <span class="mark">A</span>
+      <h1>Test the complete order flow.</h1>
+      <p>Open the student page in one tab and the vendor console in another. An order placed by the student appears instantly for vendor approval.</p>
+      <nav class="links" aria-label="Demo pages">
+        <a href="student-app/index.html">Student ordering app <span>Open P2 →</span></a>
+        <a href="vendor-dashboard/index.html">Vendor approval console <span>Open P3 →</span></a>
+      </nav>
+      <p class="note">Run the database migration once and serve this folder through Live Server before testing.</p>
+    </main>
+  </body>
+</html>
