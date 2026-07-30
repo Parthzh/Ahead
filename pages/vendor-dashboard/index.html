@@ -1,90 +1,60 @@
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ahead — Vendor Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script>if (sessionStorage.getItem('vendor_auth') !== 'true') window.location.replace('login.html');</script>
 </head>
-
 <body>
   <main class="vendor-console">
-    <script>
-      if (window.location.protocol === 'file:') {
-        alert("Wait! The vendor dashboard requires a web server to connect to Supabase. You opened it as a local file (file://). Please right-click index.html in VS Code and select 'Open with Live Server'!");
-      }
-    </script>
+    <script>if (window.location.protocol === 'file:') alert("Wait! The vendor dashboard requires a web server to connect to Supabase. You opened it as a local file (file://). Please right-click index.html in VS Code and select 'Open with Live Server'!");</script>
     <header class="console-header">
       <div>
-        <p class="eyebrow">Ahead · Vendor console</p>
+        <p class="eyebrow"><a class="brand-link" href="../../index.html">Ahead</a> · Vendor console</p>
         <h1>Order approvals</h1>
       </div>
-      <div class="connection" aria-live="polite"><span class="live-dot" id="live-dot"></span><span
-          id="live-text">Connecting…</span></div>
+      <div class="connection" aria-live="polite">
+        <span class="live-dot" id="live-dot"></span><span id="live-text">Connecting…</span>
+        <button id="logout-button" type="button" class="button-secondary logout-button">Logout</button>
+      </div>
     </header>
-
-    <div class="connection-banner" id="connection-banner" hidden><span id="connection-message"></span><button
-        id="reconnect-button" type="button">Reconnect</button></div>
-
+    <div class="connection-banner" id="connection-banner" hidden><span id="connection-message"></span><button id="reconnect-button" type="button">Reconnect</button></div>
     <section class="overview" aria-label="Queue summary">
       <span><strong id="queued-count">0</strong> awaiting approval</span>
       <span><strong id="preparing-count">0</strong> in preparation</span>
       <button id="refresh-button" type="button">Refresh</button>
     </section>
-
-    <section class="current-order-section" aria-labelledby="current-order-heading">
-      <div class="section-heading">
-        <p class="eyebrow">Decision now</p>
-        <h2 id="current-order-heading">Current order</h2>
-      </div>
-      <div class="current-order" id="current-order">
-        <p class="empty-state">Loading the next order…</p>
-      </div>
-    </section>
-
-    <section class="upcoming-section" aria-labelledby="upcoming-heading">
-      <div class="section-heading">
-        <p class="eyebrow">Next in line</p>
-        <h2 id="upcoming-heading">Upcoming orders</h2>
-      </div>
-      <div class="upcoming-list" id="upcoming-list"></div>
-    </section>
-
-    <section class="preparing-section" aria-labelledby="preparing-heading">
-      <div class="section-heading">
-        <p class="eyebrow">Cooking now</p>
-        <h2 id="preparing-heading">In preparation</h2>
-      </div>
-      <div class="preparing-list" id="preparing-list">
-        <p class="empty-state">No orders in preparation.</p>
-      </div>
-    </section>
-
-    <section class="availability-section" aria-labelledby="availability-heading">
-      <div class="section-heading">
-        <p class="eyebrow">Menu control</p>
-        <h2 id="availability-heading">Availability</h2>
-      </div>
-      <p class="section-note">Turn an item off when it is unavailable. Students using the demo menu see the change
-        immediately.</p>
-      <div class="availability-list" id="availability-list">
-        <p class="empty-state">Loading menu…</p>
-      </div>
-    </section>
+    <div class="dashboard-grid">
+      <section class="dashboard-card current-order-section" aria-labelledby="current-order-heading">
+        <div class="section-heading"><p class="eyebrow">Decision now</p><h2 id="current-order-heading">Current order</h2></div>
+        <div class="current-order" id="current-order"><p class="empty-state">Loading the next order…</p></div>
+      </section>
+      <section class="dashboard-card upcoming-section" aria-labelledby="upcoming-heading">
+        <div class="section-heading"><p class="eyebrow">Next in line</p><h2 id="upcoming-heading">Upcoming orders</h2></div>
+        <div class="upcoming-list" id="upcoming-list"></div>
+      </section>
+      <section class="dashboard-card preparing-section" aria-labelledby="preparing-heading">
+        <div class="section-heading"><p class="eyebrow">Cooking now</p><h2 id="preparing-heading">In preparation</h2></div>
+        <div class="preparing-list" id="preparing-list"><p class="empty-state">No orders in preparation.</p></div>
+      </section>
+      <section class="dashboard-card availability-section" aria-labelledby="availability-heading">
+        <div class="section-heading section-heading-with-action"><div><p class="eyebrow">Menu control</p><h2 id="availability-heading">Availability</h2></div><button id="availability-toggle" class="availability-toggle" type="button" aria-expanded="false">See More</button></div>
+        <p class="section-note">Tap an item to update its status for students immediately.</p>
+        <div class="availability-list" id="availability-list"><p class="empty-state">Loading menu…</p></div>
+      </section>
+    </div>
   </main>
-
-  <dialog id="confirmation-dialog">
-    <form method="dialog">
-      <p class="eyebrow">Confirm decision</p>
-      <h2 id="confirm-title">Approve order?</h2>
-      <p id="confirm-message"></p>
-      <div class="dialog-actions"><button value="cancel" class="button-secondary">Go back</button><button
-          value="confirm" class="button-primary">Confirm</button></div>
-    </form>
+  <dialog id="confirmation-dialog"><form method="dialog"><p class="eyebrow">Confirm decision</p><h2 id="confirm-title">Approve order?</h2><p id="confirm-message"></p><div class="dialog-actions"><button value="cancel" class="button-secondary">Go back</button><button value="confirm" class="button-primary">Confirm</button></div></form></dialog>
+  <dialog id="availability-dialog" class="availability-dialog" aria-labelledby="availability-dialog-heading">
+    <div class="availability-dialog-header"><div><p class="eyebrow">Menu control</p><h2 id="availability-dialog-heading">All menu items</h2></div><button id="availability-dialog-close" class="availability-toggle" type="button">Show Less</button></div>
+    <div class="availability-list availability-dialog-list" id="availability-dialog-list"></div>
   </dialog>
   <script type="module" src="app.js"></script>
 </body>
-
 </html>
