@@ -1,0 +1,251 @@
+<!doctype html>
+<!--
+  Ahead / student-app
+  Run locally with VS Code's "Live Server" extension, or from this folder run:
+    npx serve .
+  Then open the localhost address it prints. Do not double-click index.html:
+  browser module security can block shared imports when opening from file://.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#1d6f4f" />
+    <title>Ahead | Order ahead</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+    <div class="ambient-orb orb-4"></div>
+    <div id="student-notice" class="student-notice" role="status" aria-live="assertive" hidden></div>
+    <script>
+      if (window.location.protocol === 'file:') {
+        alert("Wait! The student app requires a web server to connect to Supabase. You opened it as a local file (file://). Please right-click index.html in VS Code and select 'Open with Live Server'!");
+      }
+    </script>
+    <main class="app-shell">
+      <header class="site-header">
+        <a class="brand" href="../../index.html" aria-label="Ahead home">
+          <span class="brand-mark" aria-hidden="true">A</span>
+          <span>Ahead</span>
+        </a>
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <p class="header-note" style="margin: 0;"><strong>Squad ID: <span id="header-squad-code" style="color: var(--accent-green);">...</span></strong></p>
+          <p class="header-note" style="margin: 0; opacity: 0.5;">|</p>
+          <p class="header-note" style="margin: 0;">Canteen pre-order</p>
+        </div>
+      </header>
+
+      <section id="browse-view" class="browse-view">
+        <div class="intro-row">
+          <div>
+            <p class="eyebrow">SKIP THE QUEUE</p>
+            <h1>Order before the rush.</h1>
+            <p class="intro-copy">Choose your food now. We’ll give you a clear pickup time when your order is in.</p>
+          </div>
+          <section class="rush-meter" aria-label="Current canteen crowd level">
+            <span class="rush-label">CANTEEN NOW</span>
+            <strong id="rush-level">Loading</strong>
+            <span id="rush-detail">Checking the queue</span>
+          </section>
+        </div>
+
+        <section class="menu-section" aria-labelledby="menu-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">TODAY'S MENU</p>
+              <h2 id="menu-title">Ready when you are</h2>
+            </div>
+            <span id="menu-state" class="menu-state" aria-live="polite">Loading menu…</span>
+          </div>
+          <!-- When connected to Supabase, this renders the menu rows seeded by P1. -->
+          <div id="menu-grid" class="menu-grid" aria-live="polite"></div>
+        </section>
+
+        <section class="combo-section" aria-label="Popular combos">
+          <div>
+            <p class="eyebrow">MOST ORDERED TOGETHER</p>
+            <h2 id="combo-title">A faster choice</h2>
+          </div>
+          <div id="combo-list" class="combo-list"></div>
+        </section>
+      </section>
+
+      <section id="confirmation-view" class="confirmation-view" hidden aria-live="polite">
+        <div class="success-animation">
+          <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+          </svg>
+        </div>
+        <p class="eyebrow success-text">ORDER CONFIRMED</p>
+        <h1>You’re ahead of the line.</h1>
+        <p class="confirmation-copy">Show this token at the pickup counter. We’ll keep the time updated as the kitchen moves.</p>
+        <div class="delivery-bike-animation" aria-label="Order is preparing">
+          <div class="bike-wrapper">
+            <svg class="bike-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="90" height="90">
+              <rect x="5" y="16" width="16" height="18" fill="var(--color-accent)" rx="2" />
+              <path d="M5 24 L21 24" stroke="rgba(255,255,255,0.3)" stroke-width="2" />
+              
+              <path d="M26 28 L28 40 L34 40 L32 34 L28 28" fill="none" stroke="#3d403b" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+              
+              <path d="M22 38 L48 38 L54 26 L46 22 L38 32 L22 32 Z" fill="var(--color-primary)" />
+              <path d="M46 22 L44 14 L40 14" fill="none" stroke="var(--color-text)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+              <rect x="22" y="28" width="12" height="4" fill="var(--color-text)" rx="2" />
+              
+              <path d="M24 28 L26 15 Q 30 12 34 15 L32 28 Z" fill="var(--color-accent)" />
+              
+              <path d="M30 16 L36 18 L40 14" fill="none" stroke="var(--color-accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+              <circle cx="40" cy="14" r="1.5" fill="#f4c8a2" />
+
+              <circle cx="30" cy="8" r="5" fill="#f4c8a2" />
+              <path d="M24 8 A 6 6 0 0 1 36 8 L 37 9 L 23 9 Z" fill="var(--color-primary-dark)" />
+              <path d="M24 9 L 30 14 L 36 9" fill="none" stroke="#24291f" stroke-width="0.8" />
+              
+              <circle cx="28" cy="9.5" r="0.8" fill="#24291f" />
+              <circle cx="32" cy="9.5" r="0.8" fill="#24291f" />
+              <path d="M27 11.5 Q 30 14 33 11.5" fill="none" stroke="#24291f" stroke-width="1" stroke-linecap="round" />
+              <circle cx="26" cy="11.5" r="1" fill="#f58888" opacity="0.6" />
+              <circle cx="34" cy="11.5" r="1" fill="#f58888" opacity="0.6" />
+
+              <g class="waving-arm">
+                <path d="M28 15 L18 8" fill="none" stroke="var(--color-accent)" stroke-width="3" stroke-linecap="round" />
+                <circle cx="18" cy="8" r="2" fill="#f4c8a2" />
+                <path d="M18 8 L 16 5 M18 8 L 18 5 M18 8 L 20 6" fill="none" stroke="#f4c8a2" stroke-width="1" stroke-linecap="round" />
+              </g>
+
+              <circle class="wheel" cx="16" cy="44" r="8" fill="none" stroke="var(--color-text)" stroke-width="3" stroke-dasharray="6 6"/>
+              <circle cx="16" cy="44" r="3" fill="var(--color-border)" />
+              <circle class="wheel" cx="50" cy="44" r="8" fill="none" stroke="var(--color-text)" stroke-width="3" stroke-dasharray="6 6"/>
+              <circle cx="50" cy="44" r="3" fill="var(--color-border)" />
+              <circle cx="54" cy="26" r="3" fill="#ffffff" />
+            </svg>
+            <div class="wind wind-1"></div>
+            <div class="wind wind-2"></div>
+            <div class="wind wind-3"></div>
+          </div>
+          <div class="road-line"></div>
+        </div>
+        <div class="token-panel" aria-label="Your order token">
+          <span>🧾 YOUR TOKEN</span>
+          <strong id="order-token">A-001</strong>
+        </div>
+        <div class="order-progress" aria-label="Order progress">
+          <div class="progress-track">
+            <div id="rocket-icon" class="rocket-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="36" height="36">
+                <path class="rocket-flame" fill="var(--color-accent)" d="M54 366.1c-12.8 19-33 46.8-49 71.9-5.1 8.1-1.3 19.3 7.5 22.8 38.3 15.3 90 28.6 116.5 28.6 20.3 0 35.9-4.8 45.4-10.4 12.8-7.5 13.9-25.2 2-34.1L54 366.1z"/>
+                <path class="rocket-body" fill="var(--color-primary)" d="M492.8 19.2c-15.3-15.3-39.7-18.7-59.5-8.2-51.5 27.2-114 62-167.3 97.4-4.8-1.5-9.8-2.6-15-3.3-15.3-2.1-30.8 1.4-43.2 9.8l-72.1 48.7c-9.1 6.1-10.7 19-3.2 27l28.6 30.2-70.1 70.1-17.7-17.7c-7.3-7.3-18-9-27.1-4.4L18.4 282.7c-12.7 6.4-14 24.3-2 32.3l126.9 84.6c7.7 5.1 17.5 6.4 26.3 3.5l140.7-46.9c7.2-2.4 12.1-9 12.7-16.6l1.3-16.6 70.1-70.1 30.2 28.6c8 7.5 20.9 5.9 27-3.2l48.7-72.1c8.4-12.4 11.9-27.9 9.8-43.2-.7-5.2-1.8-10.2-3.3-15 35.4-53.3 70.2-115.8 97.4-167.3 10.5-19.8 7.1-44.2-8.2-59.5zm-147.2 201.2c-20 20-52.4 20-72.4 0s-20-52.4 0-72.4 52.4-20 72.4 0 20 52.4 0 72.4z"/>
+              </svg>
+            </div>
+          </div>
+          <div class="progress-steps">
+            <span class="is-active" data-step="queued">Awaiting approval</span>
+            <span data-step="preparing">Preparing</span>
+            <span data-step="ready">Ready</span>
+          </div>
+        </div>
+        <div class="ready-details">
+          <div>
+            <span>ESTIMATED PICKUP</span>
+            <strong id="ready-time">—</strong>
+          </div>
+          <div>
+            <span>WAIT TIME</span>
+            <strong id="wait-time">—</strong>
+          </div>
+        </div>
+        
+        <div class="bollywood-quote-container" id="bollywood-quote-container" aria-live="polite">
+          <p id="bollywood-quote-text" class="quote-text"></p>
+          <p id="bollywood-quote-movie" class="quote-movie"></p>
+        </div>
+
+        <p id="status-message" class="status-message">Your order is in the queue.</p>
+        
+        <button id="new-order-button" class="upsell-message" type="button" aria-label="Not enough for today? Try more from our delicious menu">
+          <span class="upsell-text">Not enough for today, Try more from our delicious menu</span>
+          <div class="upsell-smiley" aria-hidden="true">
+            <svg viewBox="0 0 32 32" width="32" height="32">
+              <circle cx="16" cy="16" r="14" fill="#fbd148" />
+              <!-- Normal Face -->
+              <g class="face-normal">
+                <circle cx="11" cy="13" r="2" fill="#24291f" />
+                <circle cx="21" cy="13" r="2" fill="#24291f" />
+                <path d="M10 20 Q 16 24 22 20" fill="none" stroke="#24291f" stroke-width="2" stroke-linecap="round" />
+              </g>
+              <!-- Excited Face -->
+              <g class="face-excited">
+                <!-- ^ ^ eyes -->
+                <path d="M9 14 Q 11 11 13 14" fill="none" stroke="#24291f" stroke-width="2.5" stroke-linecap="round" />
+                <path d="M19 14 Q 21 11 23 14" fill="none" stroke="#24291f" stroke-width="2.5" stroke-linecap="round" />
+                <!-- Open mouth -->
+                <path d="M10 19 C 10 28, 22 28, 22 19 Z" fill="#24291f" />
+                <path d="M13 23 C 13 27, 19 27, 19 23 Z" fill="#f58888" />
+              </g>
+            </svg>
+          </div>
+        </button>
+      </section>
+    </main>
+
+    <aside id="cart" class="cart" aria-label="Your cart">
+      
+      <div class="cart-tabs">
+        <button id="tab-mini" class="cart-tab active">My Items</button>
+        <button id="tab-master" class="cart-tab">Squad Cart</button>
+      </div>
+
+      <!-- Mini Cart View -->
+      <div id="cart-view-mini">
+        <div class="cart-summary">
+          <span class="cart-kicker">MY MINI CART</span>
+          <strong id="cart-count">0 items</strong>
+          <span id="cart-total">₹0</span>
+        </div>
+        <button id="cart-toggle" class="cart-toggle" type="button" aria-expanded="false" aria-controls="cart-detail">View cart</button>
+        <div id="cart-detail" class="cart-detail">
+          <div id="cart-items" class="cart-items"></div>
+          <button id="pay-mini-button" class="place-order-button" type="button" disabled>
+            Pay & Add to Squad <span id="place-order-total">₹0.00</span>
+          </button>
+          <p id="order-error" class="order-error"></p>
+        </div>
+      </div>
+
+      <!-- Master Cart View -->
+      <div id="cart-view-master" hidden>
+        <div class="cart-summary" style="background: rgba(29, 111, 79, 0.05);">
+          <span class="cart-kicker" style="color: var(--accent-green);">SQUAD ID: <span id="squad-code-display"></span></span>
+          <strong id="master-count">0 paid items</strong>
+        </div>
+        <div class="cart-detail" style="display: block;">
+          <div id="master-items" class="cart-items" style="min-height: 100px;">
+            <p class="empty-state" style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 14px;">Waiting for squad members to add items...</p>
+          </div>
+          <button id="submit-squad-button" class="place-order-button" type="button" disabled>
+            Submit Squad Order
+          </button>
+          <p id="master-error" class="order-error"></p>
+        </div>
+      </div>
+    </aside>
+
+    <template id="menu-item-template">
+      <article class="menu-item">
+        <img class="menu-photo" src="" alt="" />
+        <div class="menu-item-topline"><span class="prep-time"></span><span class="popular-badge" hidden>Popular</span><span class="unavailable-badge" hidden>Not available</span></div>
+        <h3></h3>
+        <div class="menu-item-footer"><strong class="item-price"></strong><div class="item-control"></div></div>
+      </article>
+    </template>
+    <!-- Required by P1's shared Supabase client. Keep it before app.js. -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
